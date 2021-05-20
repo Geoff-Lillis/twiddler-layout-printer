@@ -51,7 +51,6 @@ function Get-AllPossibleChords {
 
 function Get-LayoutFromCSV {
     Param (
-        #Test it exists, is valid CSV
         $Path
     )
     $SpecialKeys = Get-SpecialKeys
@@ -110,9 +109,6 @@ function Get-DisplayedKeystrokes($Keystrokes, $Type, $SpecialKeys) {
 }
 
 function Get-CellContents ($ChordToKeystrokes, $PartialChord) {
-    #Writing this in an attempt to remove duplicates
-    #Get a better understanding of what's going on here.
-    #It's not a grid. Cell? 
     foreach ($Row in 0..3) {
         $KeyAtRowToDisplay = $PartialChord.Chars($Row)
         if ($KeyAtRowToDisplay -eq "O") {
@@ -129,7 +125,6 @@ function Get-CellContents ($ChordToKeystrokes, $PartialChord) {
 }
 
 function Get-ChordsWithoutDuplicatedKeystrokes ($ChordToKeystrokes) {
-    #Make this clearer. Get-ReducedChordsThatStillPrintAllKeystrokes?
     $Chords = Get-AllPossibleChords
     foreach ($Chord in $Chords) {
         $Keystrokes = Get-CellContents $ChordToKeystrokes $Chord
@@ -149,9 +144,6 @@ function Get-ChordsWithoutDuplicatedKeystrokes ($ChordToKeystrokes) {
 }
 
 function Write-FormattedRowContents {
-    #You can't call it "Get" if it doesn't return anything and it changes state.
-    #Write-FormattedRowContents?
-    #Split out a "Write-RowWithPressedButton" and "Write-RowWithNoPressedButtons"
     Param (
         [ValidateRange(0,3)]
         [int]$Row,
@@ -224,7 +216,7 @@ function Format-Layout {
         $Layout, 
         $GridsPerRow = [math]::Floor($Host.UI.RawUI.WindowSize.Width / 15),
         [ValidateRange(0, 3)] 
-        $MinUnusedKeys = 1, #Is this compatible with ReduceDuplicates?
+        $MinUnusedKeys = 1,
         [switch]$ChordHeader,
         [switch]$ReduceDuplicates
     )

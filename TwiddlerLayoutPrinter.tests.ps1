@@ -107,10 +107,31 @@ Describe Get-DisplayedKeystrokes {
     }
 }
 Describe Get-CellContents  {
-
+    It "Returns the expected cell contents based on sample data" {
+        $ChordToKeystrokes = @{"LROO" = "er"; "LMOO" = "me"; "LLOO" = "he"; "LORO" = "ea"}
+        Get-CellContents -ChordToKeystrokes $ChordToKeystrokes -PartialChord "LOOO" |
+            Should -Be "he", "me", "er", "ea"
+    }
 }
 Describe Get-ChordsWithoutDuplicatedKeystrokes  {
-
+    It "Gives the expected result based on sample data" {
+        $Layout = @"
+        "Chord", "KeyStrokes",                         "KeysCount", "Type"
+        "MMRO",  "<Delete>",                           "3",         "Special"
+        "MLMO",  "<Left Ctrl><Backspace></Left Ctrl>", "3",         "Special"
+        "ROOO",  "o",                                  "1",         "Letter"
+        "MOOO",  "i",                                  "1",         "Letter"
+        "LOOO",  "e",                                  "1",         "Letter"
+        "OROO",  "r",                                  "1",         "Letter"
+        "RROO",  "or",                                 "2",         "MultiCharacter"
+        "MROO",  "ri",                                 "2",         "MultiCharacter"
+        "LROO",  "er",                                 "2",         "MultiCharacter"
+        "OMOO",  "m",                                  "1",         "Letter"
+"@ | ConvertFrom-CSV
+        $ChordToKeystrokes = Get-ChordToKeystrokesHashtable $Layout
+        Get-ChordsWithoutDuplicatedKeystrokes (Get-ChordToKeystrokesHashtable $Layout) |
+            Should -Be "OOOO","LOOO","MOOO","ROOO","MLOO","MMOO"
+    }
 }
 Describe Write-FormattedRowContents  {
     It "Calls Get-RowWithOneKeyPressed if a key is pressed" {

@@ -214,9 +214,8 @@ Describe Write-FormattedRow  {
 }
 
 Describe Format-Layout {
-    Mock Write-Host {} -ModuleName TwiddlerLayoutPrinter
-    It "Formats Layouts" {
-
+    BeforeAll {
+        Mock Write-Host {} -ModuleName TwiddlerLayoutPrinter
         @"
         "Chord","Key Strokes"
         "   N OOOL","<Left GUI>s</Left GUI>"
@@ -235,6 +234,8 @@ Describe Format-Layout {
         Mock Write-FormattedRow {} -ModuleName TwiddlerLayoutPrinter
         Mock Write-BottomOfGrids {} -ModuleName TwiddlerLayoutPrinter
 
+    }
+    It "Formats Layouts" {
         Format-Layout (Get-LayoutFromCSV TestDrive:\Layout.csv) -GridsPerRow 10
         Assert-MockCalled Write-TopOfGrids -Exactly 18 -ModuleName TwiddlerLayoutPrinter -ParameterFilter { 
             $Object -eq $null -and -not $NoNewLine 
@@ -247,5 +248,15 @@ Describe Format-Layout {
         Assert-MockCalled Write-BottomOfGrids -Exactly 18 -ModuleName TwiddlerLayoutPrinter -ParameterFilter { 
             $Object -eq $null -and -not $NoNewLine 
         }
+    }
+    It "Calls Get-ChordsWithoutDuplicatedKeystrokes when the -ReduceDuplicates switch is used" {
+        Mock Get-ChordsWithoutDuplicatedKeystrokes {} -ModuleName TwiddlerLayoutPrinter
+        Format-Layout (Get-LayoutFromCSV TestDrive:\Layout.csv) -GridsPerRow 10 -ReduceDuplicates |
+            Should -Invoke Get-ChordsWithoutDuplicatedKeystrokes -ModuleName TwiddlerLayoutPrinter
+    }
+    It "Calls Write-ChordName when the -ChordHeader switch is used" {
+        Mock Write-ChordName {} -ModuleName TwiddlerLayoutPrinter
+        Format-Layout (Get-LayoutFromCSV TestDrive:\Layout.csv) -GridsPerRow 10 -ChordHeader |
+            Should -Invoke Write-ChordName -ModuleName TwiddlerLayoutPrinter
     }
 }

@@ -33,6 +33,7 @@
         '<CapsLock>'                          = "CAP"
         '<NumLock>'                           = "NUM"
         ' '                                   = '_'
+        '<!--  --><Left Ctrl><LeftArrow></Left Ctrl><LeftArrow>' = "<!->"
     }
 }
 
@@ -51,7 +52,8 @@ function Get-AllPossibleChords {
 
 function Get-LayoutFromCSV {
     Param (
-        $Path
+        [Parameter(Mandatory)]
+        [System.IO.FileInfo]$Path
     )
     $SpecialKeys = Get-SpecialKeys
     $NoModifierKeysPrefix = "   O "
@@ -210,22 +212,26 @@ function Write-FormattedRow ([int]$GridsToDisplay, $ChordsToDisplay, $ChordToKey
     Write-Host
 }
 
-function Format-Layout {
-    Param(
-        [Parameter(Mandatory)]
-        $Layout, 
-        $GridsPerRow = [math]::Floor($Host.UI.RawUI.WindowSize.Width / 15),
-        [ValidateRange(0, 3)] 
-        $MinUnusedKeys = 1,
-        [switch]$ChordHeader,
-        [switch]$ReduceDuplicates
+function Get-ChordsToDisplay {
+    param (
+        $ReduceDuplicates,
+        $ChordToKeystrokes,
+        $MinUnusedKeys
     )
-    $ChordToKeystrokes = Get-ChordToKeystrokesHashtable $Layout
-    $ChordsToDisplay = if ($ReduceDuplicates) {
+    if ($ReduceDuplicates) {
         Get-ChordsWithoutDuplicatedKeystrokes $ChordToKeystrokes
     } else {
         Get-AllPossibleChords | Where-Object { ([regex]::Matches($_, "O")).Count -ge $MinUnusedKeys }
     }
+}
+
+function Write-LayoutContents {
+    param(
+        $ChordsToDisplay,
+        $GridsPerRow,
+        $ChordHeader,
+        $ChordToKeystrokes
+    )
     for ($j = 0; $j -lt $ChordsToDisplay.Length; $j += $GridsPerRow) {
         $RemainingChordCount = ($ChordsToDisplay.Count - $j)
         $GridsToDisplayCount = [math]::min($RemainingChordCount, $GridsPerRow)
@@ -244,5 +250,31 @@ function Format-Layout {
             Write-FormattedRow @FormattedRowParams
         }
         Write-BottomOfGrids $GridsToDisplayCount
+    }
+}
+
+function Format-Layout {
+    Param(
+        [Parameter(Mandatory)]
+        $Layout, 
+        $GridsPerRow = [math]::Floor($Host.UI.RawUI.WindowSize.Width / 15),
+        [ValidateRange(0, 3)] 
+        $MinUnusedKeys = 1,
+        [switch]$ChordHeader,
+        [switch]$ReduceDuplicates
+    )
+    $MaxPrintableKeystrokeLength = 4
+    $PrintableLayout = $Layout | 
+        Where-Object {$_.keystrokes.length -le $MaxPrintableKeystrokeLength -or $_.Type -eq "Special"}
+    $UnprintableLayout = $Layout | 
+        Where-Object {$_.keystrokes.length -gt $MaxPrintableKeystrokeLength -and $_.Type -ne "Special"}
+    $ChordToKeystrokes = Get-ChordToKeystrokesHashtable $PrintableLayout
+    $ChordsToDisplay = Get-ChordsToDisplay $ReduceDuplicates $ChordToKeystrokes $MinUnusedKeys
+    Write-LayoutContents $ChordsToDisplay $GridsPerRow $ChordHeader $ChordToKeystrokes
+    if($UnprintableLayout) {
+        Write-Host "The following are too long to represent on the layout:"
+        $UnprintableLayout | ForEach-Object {
+            Write-Host "$($_.Chord):`t$($_.KeyStrokes)"
+        }
     }
 }

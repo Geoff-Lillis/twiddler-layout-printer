@@ -4,8 +4,8 @@ Describe Get-SpecialKeys {
     It "Should return a hashtable" {
         Get-SpecialKeys | Should -BeOfType "Hashtable"
     }
-    It "Should not have any symbols longer than three characters" {
-        (Get-SpecialKeys).values | Where-Object length -gt 3 | Should -BeNullOrEmpty
+    It "Should not have any symbols longer than four characters" {
+        (Get-SpecialKeys).values | Where-Object length -gt 4 | Should -BeNullOrEmpty
     }
 }
 

@@ -259,4 +259,20 @@ Describe Format-Layout {
         Format-Layout (Get-LayoutFromCSV TestDrive:\Layout.csv) -GridsPerRow 10 -ChordHeader |
             Should -Invoke Write-ChordName -ModuleName TwiddlerLayoutPrinter
     }
+    It "Prints a warning when keystrokes won't fit in the grid" {
+        '        "   O RRRR","These keystrokes will not fit in a grid"' | 
+            Out-File TestDrive:\Layout.csv -Append
+        Format-Layout (Get-LayoutFromCSV TestDrive:\Layout.csv) -GridsPerRow 10 -ChordHeader |
+            Should -Invoke Write-Host -ModuleName TwiddlerLayoutPrinter -ParameterFilter {
+                $Object -eq "The following are too long to represent on the layout:"
+            } -Exactly 1
+    }
+    It "Lists keystrokes that are too long to fit within grids" {
+        '        "   O RRRR","These keystrokes will not fit in a grid"' | 
+            Out-File TestDrive:\Layout.csv -Append
+        Format-Layout (Get-LayoutFromCSV TestDrive:\Layout.csv) -GridsPerRow 10 -ChordHeader |
+            Should -Invoke Write-Host -ModuleName TwiddlerLayoutPrinter -ParameterFilter {
+                $Object -eq "RRRR:`tThese keystrokes will not fit in a grid"
+            }
+    }
 }

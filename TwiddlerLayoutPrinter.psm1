@@ -33,7 +33,7 @@
         '<CapsLock>'                          = "CAP"
         '<NumLock>'                           = "NUM"
         ' '                                   = '_'
-        '<!--  --><Left Ctrl><LeftArrow></Left Ctrl><LeftArrow>' = "<!->"
+ #       '<!--  --><Left Ctrl><LeftArrow></Left Ctrl><LeftArrow>' = "<!->"
     }
 }
 

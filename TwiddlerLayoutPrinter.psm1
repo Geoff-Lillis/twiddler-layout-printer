@@ -1,39 +1,47 @@
 ﻿function Get-SpecialKeys {
-    @{'<Backspace>'                           = "←X"
-        '<Left Ctrl><Backspace></Left Ctrl>'  = "←←X"
-        '<UpArrow>'                           = "↑"
-        '<PageUp>'                            = "PG↑"
-        '<RightArrow>'                        = "→"
-        '<DownArrow>'                         = "↓"
-        '<PageDown>'                          = "PG↓"
-        '<LeftArrow>'                         = "←"
-        '<Left Ctrl><UpArrow></Left Ctrl>'    = "↑↑"
-        '<Left Ctrl><RightArrow></Left Ctrl>' = "→→"
-        '<Left Ctrl><DownArrow></Left Ctrl>'  = "↓↓"
-        '<Left Ctrl><LeftArrow></Left Ctrl>'  = "←←"
-        '<Return>'                            = "←|"
-        '<PrintScreen>'                       = "PSC"
-        '<Delete>'                            = "DEL"
-        '<Escape>'                            = "ESC"
-        '<Home>'                              = "HME"
-        '<End>'                               = "END"
-        '<F1>'                                = "F1"
-        '<F10>'                               = "F10"
-        '<F11>'                               = "F11"
-        '<F12>'                               = "F12"
-        '<F2>'                                = "F2"
-        '<F3>'                                = "F3"
-        '<F4>'                                = "F4"
-        '<F5>'                                = "F5"
-        '<F6>'                                = "F6"
-        '<F7>'                                = "F7"
-        '<F8>'                                = "F8"
-        '<F9>'                                = "F9"
-        '<Tab>'                               = "TAB"
-        '<CapsLock>'                          = "CAP"
-        '<NumLock>'                           = "NUM"
-        ' '                                   = '_'
- #       '<!--  --><Left Ctrl><LeftArrow></Left Ctrl><LeftArrow>' = "<!->"
+    @{'<Backspace>'                                              = "←X"
+        '<Left Ctrl><Backspace></Left Ctrl>'                     = "|←X|"
+        '<UpArrow>'                                              = "↑"
+        '<PageUp>'                                               = "PG↑"
+        '<RightArrow>'                                           = "→"
+        '<DownArrow>'                                            = "↓"
+        '<PageDown>'                                             = "PG↓"
+        '<LeftArrow>'                                            = "←"
+        '<Left Ctrl><UpArrow></Left Ctrl>'                       = "|↑|"
+        '<Left Ctrl><RightArrow></Left Ctrl>'                    = "|→|"
+        '<Left Ctrl><DownArrow></Left Ctrl>'                     = "|↓|"
+        '<Left Ctrl><LeftArrow></Left Ctrl>'                     = "|←|"
+        '<Return>'                                               = "←|"
+        '<PrintScreen>'                                          = "PSC"
+        '<Delete>'                                               = "DEL"
+        '<Escape>'                                               = "ESC"
+        '<Home>'                                                 = "HME"
+        '<Insert>'                                               = "INS"
+        '<End>'                                                  = "END"
+        '<F1>'                                                   = "F1"
+        '<F10>'                                                  = "F10"
+        '<F11>'                                                  = "F11"
+        '<F12>'                                                  = "F12"
+        '<F2>'                                                   = "F2"
+        '<F3>'                                                   = "F3"
+        '<F4>'                                                   = "F4"
+        '<F5>'                                                   = "F5"
+        '<F6>'                                                   = "F6"
+        '<F7>'                                                   = "F7"
+        '<F8>'                                                   = "F8"
+        '<F9>'                                                   = "F9"
+        '<Tab>'                                                  = "TAB"
+        '<CapsLock>'                                             = "CAP"
+        '<NumLock>'                                              = "NUM"
+        ' '                                                      = '_'
+        '<Left Ctrl>c</Left Ctrl>'                               = "|c|"
+        '<Left Ctrl>v</Left Ctrl>'                               = "|v|"
+        '<Left Ctrl>x</Left Ctrl>'                               = "|x|"
+        '<Left Ctrl>z</Left Ctrl>'                               = "|z|"
+        '<Left Ctrl>a</Left Ctrl>'                               = "|a|"
+        '<Left Ctrl>b</Left Ctrl>'                               = "|b|"
+        '<Left Ctrl>f</Left Ctrl>'                               = "|f|"
+        '<!--  --><Left Ctrl><LeftArrow></Left Ctrl><LeftArrow>' = "<!->"
     }
 }
 
@@ -147,7 +155,7 @@ function Get-ChordsWithoutDuplicatedKeystrokes ($ChordToKeystrokes) {
 
 function Write-FormattedRowContents {
     Param (
-        [ValidateRange(0,3)]
+        [ValidateRange(0, 3)]
         [int]$Row,
         [Hashtable]
         $ChordToKeystrokes,
@@ -265,13 +273,13 @@ function Format-Layout {
     )
     $MaxPrintableKeystrokeLength = 4
     $PrintableLayout = $Layout | 
-        Where-Object {$_.keystrokes.length -le $MaxPrintableKeystrokeLength -or $_.Type -eq "Special"}
+        Where-Object { $_.keystrokes.length -le $MaxPrintableKeystrokeLength -or $_.Type -eq "Special" }
     $UnprintableLayout = $Layout | 
-        Where-Object {$_.keystrokes.length -gt $MaxPrintableKeystrokeLength -and $_.Type -ne "Special"}
+        Where-Object { $_.keystrokes.length -gt $MaxPrintableKeystrokeLength -and $_.Type -ne "Special" }
     $ChordToKeystrokes = Get-ChordToKeystrokesHashtable $PrintableLayout
     $ChordsToDisplay = Get-ChordsToDisplay $ReduceDuplicates $ChordToKeystrokes $MinUnusedKeys
     Write-LayoutContents $ChordsToDisplay $GridsPerRow $ChordHeader $ChordToKeystrokes
-    if($UnprintableLayout) {
+    if ($UnprintableLayout) {
         Write-Host "The following are too long to represent on the layout:"
         $UnprintableLayout | ForEach-Object {
             Write-Host "$($_.Chord):`t$($_.KeyStrokes)"

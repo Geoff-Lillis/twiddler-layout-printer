@@ -108,7 +108,7 @@ Format-Layout $Layout -ReduceDuplicates
 
 ### Oran
 
-![Oran Layout](readme_images/Oran_layout.png "Oran Layout")
+![Oran Layout](readme_images/oran_layout.png "Oran Layout")
 
 ### Left Hand Only Dvorak (ish)
 
